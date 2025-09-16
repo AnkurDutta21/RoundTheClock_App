@@ -14,7 +14,6 @@ class CartScreen extends StatefulWidget {
 class _CartScreenState extends State<CartScreen> {
   // Professional dark red color scheme
   static const Color primaryDarkRed = Color(0xFF8B0000);
-  static const Color accentRed = Color(0xFFB71C1C);
 
   @override
   Widget build(BuildContext context) {
@@ -291,11 +290,7 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                       IconButton(
                         onPressed: () => cartProvider.increaseQuantity(item.id),
-                        icon: const Icon(
-                          Icons.add,
-                          size: 16,
-                          color: Colors.white,
-                        ),
+                        icon: Icon(Icons.add, size: 16, color: primaryDarkRed),
                         padding: const EdgeInsets.all(8),
                         constraints: const BoxConstraints(),
                       ),

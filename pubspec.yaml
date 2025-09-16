@@ -36,6 +36,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   carousel_slider: ^5.0.0
   provider: ^6.1.1
+  shared_preferences: ^2.2.2
+  url_launcher: ^6.2.3
 
 dev_dependencies:
   flutter_test:
@@ -61,14 +63,7 @@ flutter:
 
   # Assets for the application
   assets:
-    - assets/images/background splash.png
-    - assets/images/asas.png
-    - assets/images/lol.png
-    - assets/images/logo.jpg
-    - assets/images/hero-food2.jpg
-    - assets/images/hero-food4.jpg
-    - assets/images/hero-food3.jpg
-    - assets/images/the-cake-427920_1280.jpg
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

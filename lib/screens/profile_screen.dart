@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+import 'package:provider/provider.dart';
+import '../services/auth_service.dart';
+import '../providers/cart_provider.dart';
+import '../providers/favorites_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -11,14 +15,13 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   // Professional dark red color scheme
   static const Color primaryDarkRed = Color(0xFF8B0000);
-  static const Color accentRed = Color(0xFFB71C1C);
 
   // Sample user data
   final Map<String, dynamic> userData = {
     'name': 'The User',
     'email': 'the.user@email.com',
     'phone': '+91 9876543210',
-    'memberSince': 'January 2024',
+    'memberSince': 'January 2025',
     'totalOrders': 24,
     'favoriteItems': 8,
   };
@@ -246,42 +249,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildAccountSection() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
-      ),
-      child: Column(
-        children: [
-          _buildAccountItem(
-            icon: Icons.shopping_bag,
-            title: 'Total Orders',
-            value: '${userData['totalOrders']}',
-            onTap: () {
-              // Navigate to order history
-            },
+    return Consumer<FavoritesProvider>(
+      builder: (context, favoritesProvider, child) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
           ),
-          Divider(color: Colors.white.withOpacity(0.2), height: 1),
-          _buildAccountItem(
-            icon: Icons.favorite,
-            title: 'Favorite Items',
-            value: '${userData['favoriteItems']}',
-            onTap: () {
-              // Navigate to favorites
-            },
+          child: Column(
+            children: [
+              _buildAccountItem(
+                icon: Icons.shopping_bag,
+                title: 'Total Orders',
+                value: '${userData['totalOrders']}',
+                onTap: () {
+                  // Navigate to order history
+                },
+              ),
+              Divider(color: Colors.white.withOpacity(0.2), height: 1),
+              _buildAccountItem(
+                icon: Icons.favorite,
+                title: 'Favorite Items',
+                value: '${favoritesProvider.favoriteCount}',
+                onTap: () {
+                  Navigator.pushNamed(context, '/favorites');
+                },
+              ),
+              Divider(color: Colors.white.withOpacity(0.2), height: 1),
+              _buildAccountItem(
+                icon: Icons.location_on,
+                title: 'Delivery Addresses',
+                value: '2 saved',
+                onTap: () {
+                  // Navigate to addresses
+                },
+              ),
+            ],
           ),
-          Divider(color: Colors.white.withOpacity(0.2), height: 1),
-          _buildAccountItem(
-            icon: Icons.location_on,
-            title: 'Delivery Addresses',
-            value: '2 saved',
-            onTap: () {
-              // Navigate to addresses
-            },
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -701,11 +708,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {
+                    onPressed: () async {
                       // Perform logout
                       Navigator.of(context).pop();
-                      // Navigate to login screen
-                      Navigator.pushReplacementNamed(context, '/');
+
+                      try {
+                        // Clear cart data from storage
+                        final cartProvider = Provider.of<CartProvider>(
+                          context,
+                          listen: false,
+                        );
+                        await cartProvider.clearCartFromStorage();
+
+                        // Clear favorites data from storage
+                        final favoritesProvider =
+                            Provider.of<FavoritesProvider>(
+                              context,
+                              listen: false,
+                            );
+                        await favoritesProvider.clearFavoritesFromStorage();
+
+                        // Clear authentication data
+                        await AuthService().logout();
+
+                        // Navigate to login screen
+                        Navigator.pushReplacementNamed(context, '/');
+                      } catch (e) {
+                        // Handle logout error
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Logout failed: ${e.toString()}'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
                     },
                     child: const Text(
                       'Logout',

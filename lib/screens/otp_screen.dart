@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
+import '../services/auth_service.dart';
 
 class OtpScreen extends StatefulWidget {
   final String phoneNumber;
@@ -41,8 +42,37 @@ class _OtpScreenState extends State<OtpScreen> {
 
     if (mounted) {
       setState(() => _isLoading = false);
-      // Navigate to main dashboard with bottom navigation
-      Navigator.pushReplacementNamed(context, '/dashboard');
+
+      try {
+        // Debug: Print OTP input for verification
+        final otpInput = _otpControllers
+            .map((controller) => controller.text)
+            .join();
+        print('OTP Input: $otpInput'); // Debug log
+
+        // For demo purposes, accept any 4-digit OTP
+        if (otpInput.length == 4 && RegExp(r'^\d{4}$').hasMatch(otpInput)) {
+          // Save authentication data
+          await AuthService().login(widget.phoneNumber);
+          print(
+            'Authentication successful for phone: ${widget.phoneNumber}',
+          ); // Debug log
+
+          // Navigate to main dashboard with bottom navigation
+          Navigator.pushReplacementNamed(context, '/dashboard');
+        } else {
+          throw Exception('Invalid OTP format');
+        }
+      } catch (e) {
+        print('Authentication error: $e'); // Debug log
+        // Handle authentication error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Authentication failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

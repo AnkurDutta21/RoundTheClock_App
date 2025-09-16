@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:provider/provider.dart';
 import 'splash_screen.dart';
 import 'screens/login_screen.dart';
@@ -8,88 +7,232 @@ import 'screens/dashboard_screen.dart';
 import 'screens/menu_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/favorites_screen.dart';
+import 'screens/item_detail_screen.dart';
 import 'providers/cart_provider.dart';
+import 'providers/favorites_provider.dart';
+import 'constants/design_tokens.dart';
+import 'services/auth_service.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _isLoading = true;
+  bool _isLoggedIn = false;
+  Widget _initialScreen = const SplashScreen(child: LoginScreen());
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuthenticationStatus();
+  }
+
+  Future<void> _checkAuthenticationStatus() async {
+    try {
+      // Initialize AuthService
+      await AuthService().init();
+
+      // Check if user is logged in
+      final isLoggedIn = await AuthService().isLoggedIn();
+
+      // Check if session is expired (optional security feature)
+      final isSessionExpired = await AuthService().isSessionExpired();
+
+      if (mounted) {
+        setState(() {
+          _isLoggedIn = isLoggedIn && !isSessionExpired;
+          _isLoading = false;
+
+          if (_isLoggedIn) {
+            // User is logged in, go directly to dashboard
+            _initialScreen = const SplashScreen(child: MainDashboard());
+          } else {
+            // User needs to login
+            _initialScreen = const SplashScreen(child: LoginScreen());
+          }
+        });
+      }
+    } catch (e) {
+      // If there's an error, default to login screen
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _isLoggedIn = false;
+          _initialScreen = const SplashScreen(child: LoginScreen());
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => CartProvider(),
+    // Show loading screen while checking authentication
+    if (_isLoading) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          backgroundColor: Colors.black,
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset('assets/images/asas.png', width: 100, height: 100),
+                const SizedBox(height: 20),
+                const CircularProgressIndicator(color: Colors.orange),
+                const SizedBox(height: 20),
+                const Text(
+                  'Checking authentication...',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) {
+            final cartProvider = CartProvider();
+            // Cart will initialize itself in constructor
+            return cartProvider;
+          },
+        ),
+        ChangeNotifierProvider(
+          create: (context) {
+            final favoritesProvider = FavoritesProvider();
+            // Favorites will initialize itself in constructor
+            return favoritesProvider;
+          },
+        ),
+      ],
       child: MaterialApp(
         title: 'Round The Clock',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          colorScheme: const ColorScheme(
-            primary: Color(0xFFFF6B35), // Professional orange
-            secondary: Color(0xFF8B0000), // Dark red
+          colorScheme: ColorScheme(
+            primary:
+                DesignTokens.hasMinimumContrast(
+                  Colors.white,
+                  const Color(0xFFFF6B35),
+                )
+                ? const Color(0xFFFF6B35) // Professional orange
+                : const Color(0xFFE65100), // Darker orange for better contrast
+            secondary:
+                DesignTokens.hasMinimumContrast(
+                  Colors.white,
+                  const Color(0xFF8B0000),
+                )
+                ? const Color(0xFF8B0000) // Dark red
+                : const Color(0xFFB71C1C), // Lighter red for better contrast
             surface: Colors.white,
-            background: Color(0xFFFAFAFA),
-            error: Color(0xFFE53935),
-            onPrimary: Colors.white,
-            onSecondary: Colors.white,
-            onSurface: Color(0xFF1C1B1F),
-            onBackground: Color(0xFF1C1B1F),
-            onError: Colors.white,
+            background: const Color(0xFFFAFAFA),
+            error: const Color(0xFFD32F2F), // Better contrast error color
+            onPrimary: DesignTokens.getAccessibleForeground(
+              const Color(0xFFFF6B35),
+            ),
+            onSecondary: DesignTokens.getAccessibleForeground(
+              const Color(0xFF8B0000),
+            ),
+            onSurface: DesignTokens.getAccessibleForeground(Colors.white),
+            onBackground: DesignTokens.getAccessibleForeground(
+              const Color(0xFFFAFAFA),
+            ),
+            onError: DesignTokens.getAccessibleForeground(
+              const Color(0xFFD32F2F),
+            ),
             brightness: Brightness.light,
           ),
           useMaterial3: true,
           fontFamily: 'Roboto', // Professional font
-          textTheme: const TextTheme(
-            headlineLarge: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              letterSpacing: -0.5,
-            ),
-            headlineMedium: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.25,
-            ),
-            titleLarge: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0,
-            ),
-            bodyLarge: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              letterSpacing: 0.15,
-            ),
-            bodyMedium: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              letterSpacing: 0.25,
-            ),
+          textTheme: TextTheme(
+            headlineLarge: DesignTokens.headlineLarge,
+            headlineMedium: DesignTokens.headlineMedium,
+            titleLarge: DesignTokens.titleLarge,
+            bodyLarge: DesignTokens.bodyLarge,
+            bodyMedium: DesignTokens.bodyMedium,
+            labelLarge: DesignTokens.labelLarge,
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
-              elevation: 2,
-              shadowColor: Colors.black.withOpacity(0.1),
+              elevation: DesignTokens.elevationSm,
+              shadowColor: Colors.black.withOpacity(DesignTokens.opacityMedium),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(
+                horizontal: DesignTokens.spacingXl,
+                vertical: DesignTokens.spacingMd,
+              ),
             ),
           ),
           cardTheme: CardThemeData(
-            elevation: 4,
+            elevation: DesignTokens.elevationMd,
             shadowColor: const Color(0x1F000000),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(DesignTokens.radiusLg),
+              ),
+            ),
+          ),
+          // Enhanced button theme with gradient support
+          outlinedButtonTheme: OutlinedButtonThemeData(
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Color(0xFFFF6B35), width: 1.5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: DesignTokens.spacingXl,
+                vertical: DesignTokens.spacingMd,
+              ),
+            ),
+          ),
+          // Enhanced input decoration theme
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+              borderSide: const BorderSide(color: Color(0xFFFF6B35), width: 2),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: DesignTokens.spacingMd,
+              vertical: DesignTokens.spacingMd,
             ),
           ),
         ),
         initialRoute: '/',
         routes: {
-          '/': (context) => const SplashScreen(child: LoginScreen()),
+          '/': (context) => _initialScreen,
           '/dashboard': (context) => const MainDashboard(),
           '/login': (context) => const LoginScreen(),
+          '/favorites': (context) => const FavoritesScreen(),
+          '/item_detail': (context) {
+            final args =
+                ModalRoute.of(context)!.settings.arguments
+                    as Map<String, dynamic>;
+            return ItemDetailScreen(item: args['item'], itemId: args['itemId']);
+          },
           '/otp': (context) {
             final phoneNumber =
                 ModalRoute.of(context)!.settings.arguments as String? ?? '';

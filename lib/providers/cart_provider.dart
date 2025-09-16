@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../models/cart_item.dart';
 
 class CartProvider with ChangeNotifier {
   final List<CartItem> _cartItems = [];
+  SharedPreferences? _prefs;
+  static const String _cartItemsKey = 'cart_items';
+  bool _isInitialized = false;
+
+  // Constructor - initialize cart when provider is created
+  CartProvider() {
+    _initializeCart();
+  }
 
   List<CartItem> get cartItems => List.unmodifiable(_cartItems);
 
@@ -13,6 +23,60 @@ class CartProvider with ChangeNotifier {
 
   double get totalPrice =>
       _cartItems.fold(0.0, (sum, item) => sum + item.totalPrice);
+
+  bool get isInitialized => _isInitialized;
+
+  // Initialize SharedPreferences and load saved cart
+  Future<void> init() async {
+    try {
+      if (!_isInitialized) {
+        await _initializeCart();
+      }
+      print('CartProvider initialized successfully'); // Debug log
+    } catch (e) {
+      print('CartProvider initialization error: $e'); // Debug log
+    }
+  }
+
+  // Initialize cart by loading from SharedPreferences
+  Future<void> _initializeCart() async {
+    try {
+      if (_prefs == null) {
+        _prefs = await SharedPreferences.getInstance();
+      }
+
+      final cartJson = _prefs!.getString(_cartItemsKey);
+      if (cartJson != null && cartJson.isNotEmpty) {
+        final List<dynamic> cartData = json.decode(cartJson);
+        _cartItems.clear();
+        _cartItems.addAll(
+          cartData.map((item) => CartItem.fromJson(item)).toList(),
+        );
+        print('Loaded ${cartData.length} items from storage'); // Debug log
+      }
+      _isInitialized = true;
+    } catch (e) {
+      print('Error initializing cart from storage: $e'); // Debug log
+      // Clear corrupted data
+      await _prefs?.remove(_cartItemsKey);
+      _isInitialized = true; // Mark as initialized even on error
+    }
+    notifyListeners(); // Notify listeners that cart is loaded
+  }
+
+  // Save cart items to SharedPreferences
+  Future<void> _saveCartToStorage() async {
+    try {
+      if (_prefs == null || !_isInitialized) return;
+
+      final cartData = _cartItems.map((item) => item.toJson()).toList();
+      final cartJson = json.encode(cartData);
+      await _prefs!.setString(_cartItemsKey, cartJson);
+      print('Saved ${_cartItems.length} items to storage'); // Debug log
+    } catch (e) {
+      print('Error saving cart to storage: $e'); // Debug log
+    }
+  }
 
   // Add item to cart
   void addToCart(CartItem item) {
@@ -31,12 +95,14 @@ class CartProvider with ChangeNotifier {
     }
 
     notifyListeners();
+    _saveCartToStorage(); // Save to persistent storage
   }
 
   // Remove item from cart
   void removeFromCart(String itemId) {
     _cartItems.removeWhere((item) => item.id == itemId);
     notifyListeners();
+    _saveCartToStorage(); // Save to persistent storage
   }
 
   // Update item quantity
@@ -48,6 +114,7 @@ class CartProvider with ChangeNotifier {
       } else {
         _cartItems[index] = _cartItems[index].copyWith(quantity: quantity);
         notifyListeners();
+        _saveCartToStorage(); // Save to persistent storage
       }
     }
   }
@@ -60,6 +127,7 @@ class CartProvider with ChangeNotifier {
         quantity: _cartItems[index].quantity + 1,
       );
       notifyListeners();
+      _saveCartToStorage(); // Save to persistent storage
     }
   }
 
@@ -73,6 +141,7 @@ class CartProvider with ChangeNotifier {
       } else {
         _cartItems[index] = _cartItems[index].copyWith(quantity: newQuantity);
         notifyListeners();
+        _saveCartToStorage(); // Save to persistent storage
       }
     }
   }
@@ -96,6 +165,21 @@ class CartProvider with ChangeNotifier {
   void clearCart() {
     _cartItems.clear();
     notifyListeners();
+    _saveCartToStorage(); // Save empty cart to persistent storage
+  }
+
+  // Clear cart data from storage (called on logout)
+  Future<void> clearCartFromStorage() async {
+    try {
+      _cartItems.clear();
+      if (_prefs != null) {
+        await _prefs!.remove(_cartItemsKey);
+        print('Cart cleared from storage'); // Debug log
+      }
+      notifyListeners();
+    } catch (e) {
+      print('Error clearing cart from storage: $e'); // Debug log
+    }
   }
 
   // Get cart item by ID

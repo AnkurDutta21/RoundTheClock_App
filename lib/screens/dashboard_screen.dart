@@ -4,7 +4,11 @@ import 'dart:ui' as ui; // Import for blur effect
 import 'package:flutter/services.dart'; // Import for SystemUiOverlayStyle
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
+import '../providers/favorites_provider.dart';
 import '../models/cart_item.dart';
+import '../widgets/animated_button.dart';
+import '../constants/design_tokens.dart';
+import 'about_us_screen.dart' as profile;
 
 class DashboardScreenContent extends StatefulWidget {
   const DashboardScreenContent({super.key});
@@ -16,8 +20,6 @@ class DashboardScreenContent extends StatefulWidget {
 class _DashboardScreenContentState extends State<DashboardScreenContent> {
   // Professional dark red color scheme
   static const Color primaryDarkRed = Color(0xFF8B0000);
-  static const Color accentRed = Color(0xFFB71C1C);
-  static const Color lightRed = Color(0xFFD32F2F);
 
   // Sample data for featured categories
   final List<Map<String, dynamic>> categories = [
@@ -114,243 +116,340 @@ class _DashboardScreenContentState extends State<DashboardScreenContent> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Enhanced header section
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                    // Enhanced header section with accessibility
+                    Semantics(
+                      header: true,
+                      label:
+                          'App header with user greeting and navigation buttons',
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: DesignTokens.spacingSm,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Welcome back,',
+                                    style: TextStyle(
+                                      fontSize: DesignTokens.fontSizeMd,
+                                      color: Colors.white.withOpacity(0.8),
+                                      fontWeight:
+                                          DesignTokens.fontWeightRegular,
+                                    ),
+                                  ),
+                                  SizedBox(height: DesignTokens.spacingXs),
+                                  const Text(
+                                    'User',
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                      letterSpacing: -0.5,
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Row(
                               children: [
-                                Text(
-                                  'Welcome back,',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white.withOpacity(0.8),
-                                    fontWeight: FontWeight.w400,
+                                Semantics(
+                                  button: true,
+                                  label: 'Notifications',
+                                  hint: 'Tap to view notifications',
+                                  child: Container(
+                                    padding: const EdgeInsets.all(
+                                      DesignTokens.spacingMd,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(
+                                        DesignTokens.opacityMedium,
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        DesignTokens.radiusMd,
+                                      ),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(
+                                          DesignTokens.opacityHigh,
+                                        ),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      Icons.notifications_outlined,
+                                      color: Colors.white,
+                                      size: DesignTokens.fontSizeXxl,
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                const Text(
-                                  'User',
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                    letterSpacing: -0.5,
-                                    height: 1.2,
+                                SizedBox(width: DesignTokens.spacingMd),
+                                Semantics(
+                                  button: true,
+                                  label:
+                                      'User profile picture, tap to view profile',
+                                  hint: 'Opens user profile screen',
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(
+                                      DesignTokens.radiusMd,
+                                    ),
+                                    child: InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const profile.AboutUsScreen(),
+                                          ),
+                                        );
+                                      },
+                                      borderRadius: BorderRadius.circular(
+                                        DesignTokens.radiusMd,
+                                      ),
+                                      child: Container(
+                                        width: 50,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            DesignTokens.radiusMd,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.white.withOpacity(
+                                              DesignTokens.opacityHigh,
+                                            ),
+                                            width: 2,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(
+                                                DesignTokens.opacityLow,
+                                              ),
+                                              blurRadius:
+                                                  DesignTokens.elevationMd,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            DesignTokens.radiusMd - 2,
+                                          ),
+                                          child: Image.asset(
+                                            'assets/images/logo.jpg',
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.2),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.notifications_outlined,
-                                  color: Colors.white,
-                                  size: 24,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.3),
-                                    width: 2,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(14),
-                                  child: Image.asset(
-                                    'assets/images/logo.jpg',
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
 
                     const SizedBox(height: 25),
 
-                    // Enhanced search bar
-                    const SizedBox(height: 30),
+                    // Enhanced search bar with accessibility
+                    SizedBox(height: DesignTokens.spacingXxl),
 
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(25),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x14000000), // Optimized color
-                            blurRadius: 8,
-                            offset: Offset(0, 2),
+                    Semantics(
+                      label: 'Search and filter section',
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(
+                            DesignTokens.radiusXxl,
                           ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                              child: TextField(
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16,
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: 'Search for food...',
-                                  hintStyle: TextStyle(
-                                    color: Colors.grey[500],
-                                    fontSize: 16,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0x14000000),
+                              blurRadius: DesignTokens.elevationMd,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Semantics(
+                                textField: true,
+                                label: 'Search for food',
+                                hint: 'Enter food name or cuisine type',
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(
+                                      DesignTokens.radiusXxl,
+                                    ),
                                   ),
-                                  prefixIcon: Icon(
-                                    Icons.search,
-                                    color: Colors.grey[600],
-                                    size: 24,
-                                  ),
-                                  border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 18,
+                                  child: TextField(
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: DesignTokens.fontSizeMd,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: 'Search for food...',
+                                      hintStyle: TextStyle(
+                                        color: Colors.grey[500],
+                                        fontSize: DesignTokens.fontSizeMd,
+                                      ),
+                                      prefixIcon: Icon(
+                                        Icons.search,
+                                        color: Colors.grey[600],
+                                        size: DesignTokens.fontSizeXxl,
+                                      ),
+                                      border: InputBorder.none,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: DesignTokens.spacingLg,
+                                            vertical: DesignTokens.spacingMd,
+                                          ),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Container(
-                            padding: const EdgeInsets.all(18),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.orange[600]!,
-                                  Colors.orange[400]!,
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(25),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.orange.withOpacity(0.3),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 3),
+                            SizedBox(width: DesignTokens.spacingMd),
+                            Semantics(
+                              button: true,
+                              label: 'Filter options',
+                              hint: 'Tap to open filter menu',
+                              child: Container(
+                                padding: const EdgeInsets.all(
+                                  DesignTokens.spacingMd,
                                 ),
-                              ],
+                                decoration: BoxDecoration(
+                                  gradient: DesignTokens.primaryGradient,
+                                  borderRadius: BorderRadius.circular(
+                                    DesignTokens.radiusXxl,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.orange.withOpacity(
+                                        DesignTokens.opacityMedium,
+                                      ),
+                                      blurRadius: DesignTokens.elevationMd,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.tune,
+                                  color: Colors.white,
+                                  size: DesignTokens.fontSizeXxl,
+                                ),
+                              ),
                             ),
-                            child: const Icon(
-                              Icons.tune,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
 
                     const SizedBox(height: 30),
 
-                    // Enhanced quick actions section
-                    const Text(
-                      'Quick Actions',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                        letterSpacing: -0.25,
-                        height: 1.3,
+                    // Enhanced quick actions section with accessibility
+                    Semantics(
+                      header: true,
+                      label: 'Quick Actions section',
+                      child: const Text(
+                        'Quick Actions',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          letterSpacing: -0.25,
+                          height: 1.3,
+                        ),
                       ),
                     ),
 
                     const SizedBox(height: 20),
 
-                    // Enhanced quick action buttons
+                    // Enhanced quick action buttons with animations
                     GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 4,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
+                            crossAxisSpacing: DesignTokens.spacingMd,
+                            mainAxisSpacing: DesignTokens.spacingMd,
                             childAspectRatio: 0.9,
                           ),
                       itemCount: quickActions.length,
                       itemBuilder: (context, index) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                quickActions[index]['color'],
-                                quickActions[index]['color'].withOpacity(0.8),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
-                              BoxShadow(
-                                color: quickActions[index]['color'].withOpacity(
-                                  0.3,
+                        return AnimatedListItem(
+                          delay: Duration(milliseconds: index * 100),
+                          semanticLabel:
+                              'Quick action: ${quickActions[index]['name']}',
+                          child: AnimatedButton(
+                            semanticLabel: quickActions[index]['name'],
+                            tooltip:
+                                'Tap to access ${quickActions[index]['name']}',
+                            onPressed: () {
+                              // Handle tap based on action type
+                              if (quickActions[index]['name'] == 'Favorites') {
+                                Navigator.pushNamed(context, '/favorites');
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      '${quickActions[index]['name']} tapped',
+                                    ),
+                                    duration:
+                                        DesignTokens.animationDurationNormal,
+                                  ),
+                                );
+                              }
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    quickActions[index]['color'],
+                                    quickActions[index]['color'].withOpacity(
+                                      0.8,
+                                    ),
+                                  ],
                                 ),
-                                blurRadius:
-                                    8, // Reduced blur radius for performance
-                                offset: const Offset(
-                                  0,
-                                  2,
-                                ), // Reduced offset for performance
+                                borderRadius: BorderRadius.circular(
+                                  DesignTokens.radiusLg,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: quickActions[index]['color']
+                                        .withOpacity(
+                                          DesignTokens.opacityMedium,
+                                        ),
+                                    blurRadius: DesignTokens.elevationMd,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(18),
-                              onTap: () {
-                                // Handle tap
-                              },
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
                                     quickActions[index]['icon'],
                                     color: Colors.white,
-                                    size: 28, // Slightly reduced icon size
+                                    size: DesignTokens.fontSizeXxl,
                                   ),
-                                  const SizedBox(height: 6), // Reduced spacing
+                                  SizedBox(height: DesignTokens.spacingXs),
                                   Text(
                                     quickActions[index]['name'],
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Colors.white,
-                                      fontSize:
-                                          11, // Slightly reduced font size
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: DesignTokens.fontSizeXs,
+                                      fontWeight:
+                                          DesignTokens.fontWeightSemiBold,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -364,14 +463,18 @@ class _DashboardScreenContentState extends State<DashboardScreenContent> {
 
                     const SizedBox(height: 30),
 
-                    // Enhanced special offers section
-                    const Text(
-                      'Special Offers',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: 0.5,
+                    // Enhanced special offers section with accessibility
+                    Semantics(
+                      header: true,
+                      label: 'Special Offers carousel',
+                      child: const Text(
+                        'Special Offers',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
 
@@ -458,13 +561,17 @@ class _DashboardScreenContentState extends State<DashboardScreenContent> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Categories',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 0.5,
+                        Semantics(
+                          header: true,
+                          label: 'Food Categories',
+                          child: const Text(
+                            'Categories',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
                         TextButton(
@@ -571,13 +678,17 @@ class _DashboardScreenContentState extends State<DashboardScreenContent> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Featured Items',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 0.5,
+                        Semantics(
+                          header: true,
+                          label: 'Featured Items grid',
+                          child: const Text(
+                            'Featured Items',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
                         TextButton(
@@ -613,40 +724,61 @@ class _DashboardScreenContentState extends State<DashboardScreenContent> {
                       ],
                     ),
 
-                    const SizedBox(height: 18),
-
-                    // Enhanced featured items grid
+                    SizedBox(
+                      height: DesignTokens.spacingSm,
+                    ), // Reduced spacing before grid for larger images
+                    // Enhanced featured items grid with animations - optimized for larger images
                     GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 15,
-                            mainAxisSpacing: 15,
-                            childAspectRatio: 0.75,
-                          ),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing:
+                            DesignTokens.spacingSm, // Reduced spacing
+                        mainAxisSpacing:
+                            DesignTokens.spacingSm, // Reduced spacing
+                        childAspectRatio:
+                            0.85, // Increased to make cards taller (more image space)
+                      ),
                       itemCount: featuredItems.length,
                       itemBuilder: (context, index) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
-                                blurRadius: 20,
-                                offset: const Offset(0, 8),
+                        return AnimatedListItem(
+                          delay: Duration(milliseconds: index * 150),
+                          semanticLabel:
+                              'Featured item: ${featuredItems[index]['name']}, ${featuredItems[index]['description']}, priced at ${featuredItems[index]['price']}, rated ${featuredItems[index]['rating']} stars',
+                          child: AnimatedButton(
+                            semanticLabel:
+                                'View details for ${featuredItems[index]['name']}',
+                            tooltip:
+                                'Tap to view ${featuredItems[index]['name']} details',
+                            onPressed: () {
+                              // Navigate to item detail screen
+                              Navigator.pushNamed(
+                                context,
+                                '/item_detail',
+                                arguments: {
+                                  'item': featuredItems[index],
+                                  'itemId':
+                                      '${featuredItems[index]['name'].toLowerCase().replaceAll(' ', '_')}_$index',
+                                },
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(
+                                  DesignTokens.radiusLg,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(
+                                      DesignTokens.opacityLow,
+                                    ),
+                                    blurRadius: DesignTokens.elevationLg,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(20),
-                              onTap: () {
-                                // Handle item tap
-                              },
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -679,35 +811,41 @@ class _DashboardScreenContentState extends State<DashboardScreenContent> {
                                                 end: Alignment.bottomCenter,
                                                 colors: [
                                                   Colors.transparent,
-                                                  Colors.black.withOpacity(0.1),
+                                                  Colors.black.withOpacity(
+                                                    DesignTokens.opacityLow,
+                                                  ),
                                                 ],
                                               ),
                                             ),
                                           ),
                                           // Rating badge
                                           Positioned(
-                                            top: 12,
-                                            right: 12,
+                                            top: DesignTokens.spacingMd,
+                                            right: DesignTokens.spacingMd,
                                             child: Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 4,
+                                                    horizontal:
+                                                        DesignTokens.spacingSm,
+                                                    vertical:
+                                                        DesignTokens.spacingXs,
                                                   ),
                                               decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [
-                                                    Colors.orange[600]!,
-                                                    Colors.orange[400]!,
-                                                  ],
-                                                ),
+                                                gradient: DesignTokens
+                                                    .primaryGradient,
                                                 borderRadius:
-                                                    BorderRadius.circular(12),
+                                                    BorderRadius.circular(
+                                                      DesignTokens.radiusMd,
+                                                    ),
                                                 boxShadow: [
                                                   BoxShadow(
                                                     color: Colors.orange
-                                                        .withOpacity(0.3),
-                                                    blurRadius: 8,
+                                                        .withOpacity(
+                                                          DesignTokens
+                                                              .opacityMedium,
+                                                        ),
+                                                    blurRadius: DesignTokens
+                                                        .elevationMd,
                                                     offset: const Offset(0, 2),
                                                   ),
                                                 ],
@@ -718,17 +856,22 @@ class _DashboardScreenContentState extends State<DashboardScreenContent> {
                                                   const Icon(
                                                     Icons.star,
                                                     color: Colors.white,
-                                                    size: 14,
+                                                    size:
+                                                        DesignTokens.fontSizeSm,
                                                   ),
-                                                  const SizedBox(width: 3),
+                                                  SizedBox(
+                                                    width:
+                                                        DesignTokens.spacingXs,
+                                                  ),
                                                   Text(
                                                     featuredItems[index]['rating']
                                                         .toString(),
-                                                    style: const TextStyle(
+                                                    style: TextStyle(
                                                       color: Colors.white,
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                                      fontSize: DesignTokens
+                                                          .fontSizeXs,
+                                                      fontWeight: DesignTokens
+                                                          .fontWeightBold,
                                                     ),
                                                   ),
                                                 ],
@@ -739,160 +882,310 @@ class _DashboardScreenContentState extends State<DashboardScreenContent> {
                                       ),
                                     ),
                                   ),
-                                  // Enhanced item details
+                                  // Enhanced item details - reduced padding for larger images
                                   Padding(
-                                    padding: const EdgeInsets.all(15),
+                                    padding: const EdgeInsets.all(
+                                      DesignTokens
+                                          .spacingSm, // Reduced from spacingMd to spacingSm
+                                    ),
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           featuredItems[index]['name'],
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             color: Colors.black,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
+                                            fontWeight:
+                                                DesignTokens.fontWeightBold,
+                                            fontSize: DesignTokens
+                                                .fontSizeSm, // Slightly smaller font
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
-                                        const SizedBox(height: 6),
+                                        SizedBox(
+                                          height: DesignTokens.spacingXs,
+                                        ),
                                         Text(
                                           featuredItems[index]['description'],
                                           style: TextStyle(
                                             color: Colors.grey[600],
-                                            fontSize: 12,
-                                            height: 1.3,
+                                            fontSize: DesignTokens.fontSizeXs,
+                                            height: 1.2, // Tighter line height
                                           ),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                         ),
-                                        const SizedBox(height: 12),
+                                        SizedBox(
+                                          height: DesignTokens
+                                              .spacingSm, // Reduced spacing
+                                        ),
                                         Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text(
-                                              featuredItems[index]['price'],
-                                              style: TextStyle(
-                                                color: Colors.orange[600],
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18,
+                                            Expanded(
+                                              child: Text(
+                                                featuredItems[index]['price'],
+                                                style: TextStyle(
+                                                  color: Colors.orange[600],
+                                                  fontWeight: DesignTokens
+                                                      .fontWeightBold,
+                                                  fontSize:
+                                                      DesignTokens.fontSizeMd,
+                                                ),
                                               ),
                                             ),
-                                            Consumer<CartProvider>(
-                                              builder: (context, cartProvider, child) {
-                                                final item =
-                                                    featuredItems[index];
-                                                final itemId =
-                                                    '${item['name'].toLowerCase().replaceAll(' ', '_')}_$index';
-                                                final isInCart = cartProvider
-                                                    .isInCart(itemId);
-                                                final quantity = cartProvider
-                                                    .getItemQuantity(itemId);
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                // Favorites button - smaller size
+                                                Consumer<FavoritesProvider>(
+                                                  builder:
+                                                      (
+                                                        context,
+                                                        favoritesProvider,
+                                                        child,
+                                                      ) {
+                                                        final item =
+                                                            featuredItems[index];
+                                                        final itemId =
+                                                            '${item['name'].toLowerCase().replaceAll(' ', '_')}_$index';
+                                                        final isFavorite =
+                                                            favoritesProvider
+                                                                .isFavorite(
+                                                                  itemId,
+                                                                );
 
-                                                return Container(
-                                                  padding: const EdgeInsets.all(
-                                                    8,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    gradient: LinearGradient(
-                                                      colors: [
-                                                        Colors.orange[600]!,
-                                                        Colors.orange[400]!,
-                                                      ],
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          12,
+                                                        return Semantics(
+                                                          button: true,
+                                                          label: isFavorite
+                                                              ? 'Remove ${item['name']} from favorites'
+                                                              : 'Add ${item['name']} to favorites',
+                                                          child: IconButton(
+                                                            onPressed: () {
+                                                              HapticFeedback.lightImpact();
+
+                                                              final cartItem = CartItem(
+                                                                id: itemId,
+                                                                name:
+                                                                    item['name'],
+                                                                description:
+                                                                    item['description'],
+                                                                price: double.parse(
+                                                                  item['price']
+                                                                      .replaceAll(
+                                                                        'Rs ',
+                                                                        '',
+                                                                      ),
+                                                                ),
+                                                                image:
+                                                                    item['image'],
+                                                              );
+
+                                                              if (isFavorite) {
+                                                                favoritesProvider
+                                                                    .removeFromFavorites(
+                                                                      itemId,
+                                                                    );
+                                                                ScaffoldMessenger.of(
+                                                                  context,
+                                                                ).showSnackBar(
+                                                                  SnackBar(
+                                                                    content: Text(
+                                                                      '${item['name']} removed from favorites',
+                                                                    ),
+                                                                    backgroundColor:
+                                                                        Colors
+                                                                            .red
+                                                                            .shade600,
+                                                                    duration:
+                                                                        const Duration(
+                                                                          seconds:
+                                                                              2,
+                                                                        ),
+                                                                    behavior:
+                                                                        SnackBarBehavior
+                                                                            .floating,
+                                                                    shape: RoundedRectangleBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                            10,
+                                                                          ),
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              } else {
+                                                                favoritesProvider
+                                                                    .addToFavorites(
+                                                                      cartItem,
+                                                                    );
+                                                                ScaffoldMessenger.of(
+                                                                  context,
+                                                                ).showSnackBar(
+                                                                  SnackBar(
+                                                                    content: Text(
+                                                                      '${item['name']} added to favorites!',
+                                                                    ),
+                                                                    backgroundColor:
+                                                                        Colors
+                                                                            .pink
+                                                                            .shade600,
+                                                                    duration:
+                                                                        const Duration(
+                                                                          seconds:
+                                                                              2,
+                                                                        ),
+                                                                    behavior:
+                                                                        SnackBarBehavior
+                                                                            .floating,
+                                                                    shape: RoundedRectangleBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                            10,
+                                                                          ),
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              }
+                                                            },
+                                                            icon: Icon(
+                                                              isFavorite
+                                                                  ? Icons
+                                                                        .favorite
+                                                                  : Icons
+                                                                        .favorite_border,
+                                                              color: isFavorite
+                                                                  ? Colors.red
+                                                                  : Colors
+                                                                        .grey[600],
+                                                              size: DesignTokens
+                                                                  .fontSizeMd,
+                                                            ),
+                                                            tooltip: isFavorite
+                                                                ? 'Remove from favorites'
+                                                                : 'Add to favorites',
+                                                            padding:
+                                                                const EdgeInsets.all(
+                                                                  DesignTokens
+                                                                      .spacingXs,
+                                                                ),
+                                                            constraints:
+                                                                const BoxConstraints(),
+                                                          ),
+                                                        );
+                                                      },
+                                                ),
+                                                // Add to cart button - smaller size
+                                                Consumer<CartProvider>(
+                                                  builder: (context, cartProvider, child) {
+                                                    final item =
+                                                        featuredItems[index];
+                                                    final itemId =
+                                                        '${item['name'].toLowerCase().replaceAll(' ', '_')}_$index';
+                                                    final isInCart =
+                                                        cartProvider.isInCart(
+                                                          itemId,
+                                                        );
+
+                                                    return AnimatedElevatedButton(
+                                                      onPressed: () {
+                                                        // Add haptic feedback
+                                                        HapticFeedback.lightImpact();
+
+                                                        // Create cart item
+                                                        final cartItem = CartItem(
+                                                          id: itemId,
+                                                          name: item['name'],
+                                                          description:
+                                                              item['description'],
+                                                          price: double.parse(
+                                                            item['price']
+                                                                .replaceAll(
+                                                                  'Rs ',
+                                                                  '',
+                                                                ),
+                                                          ),
+                                                          image: item['image'],
+                                                        );
+
+                                                        // Add to cart
+                                                        cartProvider.addToCart(
+                                                          cartItem,
+                                                        );
+
+                                                        // Show success message
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(
+                                                              '${item['name']} added to cart!',
+                                                              style: const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
+                                                              ),
+                                                            ),
+                                                            backgroundColor:
+                                                                Colors
+                                                                    .green
+                                                                    .shade600,
+                                                            duration:
+                                                                const Duration(
+                                                                  seconds: 2,
+                                                                ),
+                                                            behavior:
+                                                                SnackBarBehavior
+                                                                    .floating,
+                                                            shape: RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    10,
+                                                                  ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                      style: ElevatedButton.styleFrom(
+                                                        backgroundColor:
+                                                            Colors.orange[600],
+                                                        foregroundColor:
+                                                            Colors.white,
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                              DesignTokens
+                                                                  .spacingXs,
+                                                            ),
+                                                        minimumSize: const Size(
+                                                          DesignTokens
+                                                                  .minTouchTarget *
+                                                              0.8,
+                                                          DesignTokens
+                                                                  .minTouchTarget *
+                                                              0.8,
                                                         ),
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.orange
-                                                            .withOpacity(0.3),
-                                                        blurRadius: 8,
-                                                        offset: const Offset(
-                                                          0,
-                                                          2,
+                                                        shape: RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                DesignTokens
+                                                                    .radiusMd,
+                                                              ),
                                                         ),
                                                       ),
-                                                    ],
-                                                  ),
-                                                  child: InkWell(
-                                                    onTap: () {
-                                                      // Add haptic feedback
-                                                      HapticFeedback.lightImpact();
-
-                                                      // Create cart item
-                                                      final cartItem = CartItem(
-                                                        id: itemId,
-                                                        name: item['name'],
-                                                        description:
-                                                            item['description'],
-                                                        price: double.parse(
-                                                          item['price']
-                                                              .replaceAll(
-                                                                'Rs ',
-                                                                '',
-                                                              ),
-                                                        ),
-                                                        image: item['image'],
-                                                      );
-
-                                                      // Add to cart
-                                                      cartProvider.addToCart(
-                                                        cartItem,
-                                                      );
-
-                                                      // Show success message
-                                                      ScaffoldMessenger.of(
-                                                        context,
-                                                      ).showSnackBar(
-                                                        SnackBar(
-                                                          content: Text(
-                                                            '${item['name']} added to cart!',
-                                                            style:
-                                                                const TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
-                                                          ),
-                                                          backgroundColor:
-                                                              Colors
-                                                                  .green
-                                                                  .shade600,
-                                                          duration:
-                                                              const Duration(
-                                                                seconds: 2,
-                                                              ),
-                                                          behavior:
-                                                              SnackBarBehavior
-                                                                  .floating,
-                                                          shape: RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                  10,
-                                                                ),
-                                                          ),
-                                                        ),
-                                                      );
-                                                    },
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          12,
-                                                        ),
-                                                    child: Icon(
-                                                      isInCart
-                                                          ? Icons
-                                                                .add_shopping_cart
-                                                          : Icons.add,
-                                                      color: Colors.white,
-                                                      size: 20,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
+                                                      semanticLabel:
+                                                          'Add ${item['name']} to cart',
+                                                      child: Icon(
+                                                        Icons.add,
+                                                        color: Colors.white,
+                                                        size: DesignTokens
+                                                            .fontSizeMd,
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              ],
                                             ),
                                           ],
                                         ),

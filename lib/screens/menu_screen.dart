@@ -3,6 +3,7 @@ import 'dart:ui' as ui; // Import for blur effect
 import 'package:flutter/services.dart'; // Import for HapticFeedback
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
+import '../providers/favorites_provider.dart';
 import '../models/cart_item.dart';
 
 class MenuScreen extends StatefulWidget {
@@ -225,212 +226,346 @@ class _MenuScreenState extends State<MenuScreen> {
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: popularItems.length,
                     itemBuilder: (context, index) {
-                      return Container(
-                        margin: const EdgeInsets.only(
-                          bottom: 12,
-                        ), // Reduced margin
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.1),
-                              blurRadius: 8, // Reduced blur radius
-                              offset: const Offset(0, 3), // Reduced offset
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            // Item image with add button
-                            Stack(
-                              children: [
-                                Container(
-                                  width: 90, // Reduced width
-                                  height: 90, // Reduced height
-                                  decoration: BoxDecoration(
-                                    borderRadius: const BorderRadius.horizontal(
-                                      left: Radius.circular(15),
-                                    ),
-                                    image: DecorationImage(
-                                      image: AssetImage(
-                                        popularItems[index]['image'],
+                      return InkWell(
+                        onTap: () {
+                          // Navigate to item detail screen
+                          Navigator.pushNamed(
+                            context,
+                            '/item_detail',
+                            arguments: {
+                              'item': popularItems[index],
+                              'itemId':
+                                  '${popularItems[index]['name'].toLowerCase().replaceAll(' ', '_')}_${index + 10}',
+                            },
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(15),
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              // Item image with add button
+                              Stack(
+                                children: [
+                                  Container(
+                                    width: 90,
+                                    height: 90,
+                                    decoration: BoxDecoration(
+                                      borderRadius:
+                                          const BorderRadius.horizontal(
+                                            left: Radius.circular(15),
+                                          ),
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                          popularItems[index]['image'],
+                                        ),
+                                        fit: BoxFit.cover,
+                                        filterQuality: FilterQuality.medium,
                                       ),
-                                      fit: BoxFit.cover,
-                                      filterQuality: FilterQuality
-                                          .medium, // Balanced quality for performance
                                     ),
                                   ),
-                                ),
-                                // Add to cart button
-                                Positioned(
-                                  bottom: 6,
-                                  right: 6,
-                                  child: Consumer<CartProvider>(
-                                    builder: (context, cartProvider, child) {
-                                      final item = popularItems[index];
-                                      final itemId =
-                                          '${item['name'].toLowerCase().replaceAll(' ', '_')}_${index + 10}'; // Offset to avoid conflicts with dashboard
-                                      final isInCart = cartProvider.isInCart(
-                                        itemId,
-                                      );
+                                  // Action buttons stack
+                                  Positioned(
+                                    bottom: 6,
+                                    right: 6,
+                                    child: Column(
+                                      children: [
+                                        // Favorites button
+                                        Consumer<FavoritesProvider>(
+                                          builder: (context, favoritesProvider, child) {
+                                            final item = popularItems[index];
+                                            final itemId =
+                                                '${item['name'].toLowerCase().replaceAll(' ', '_')}_${index + 10}';
+                                            final isFavorite = favoritesProvider
+                                                .isFavorite(itemId);
 
-                                      return Container(
-                                        width: 28,
-                                        height: 28,
-                                        decoration: BoxDecoration(
-                                          color: Colors.orange.shade600,
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(
-                                                0.2,
+                                            return Container(
+                                              width: 28,
+                                              height: 28,
+                                              margin: const EdgeInsets.only(
+                                                bottom: 4,
                                               ),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: IconButton(
-                                          onPressed: () {
-                                            // Add haptic feedback
-                                            HapticFeedback.lightImpact();
-
-                                            // Create cart item
-                                            final cartItem = CartItem(
-                                              id: itemId,
-                                              name: item['name'],
-                                              description: item['description'],
-                                              price: double.parse(
-                                                item['price'].replaceAll(
-                                                  'Rs ',
-                                                  '',
-                                                ),
-                                              ),
-                                              image: item['image'],
-                                            );
-
-                                            // Add to cart
-                                            cartProvider.addToCart(cartItem);
-
-                                            // Show success message
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  '${item['name']} added to cart!',
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.w500,
+                                              decoration: BoxDecoration(
+                                                color: isFavorite
+                                                    ? Colors.pink.shade600
+                                                    : Colors.white.withOpacity(
+                                                        0.9,
+                                                      ),
+                                                shape: BoxShape.circle,
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black
+                                                        .withOpacity(0.2),
+                                                    blurRadius: 4,
+                                                    offset: const Offset(0, 2),
                                                   ),
+                                                ],
+                                              ),
+                                              child: IconButton(
+                                                onPressed: () {
+                                                  HapticFeedback.lightImpact();
+
+                                                  final cartItem = CartItem(
+                                                    id: itemId,
+                                                    name: item['name'],
+                                                    description:
+                                                        item['description'],
+                                                    price: double.parse(
+                                                      item['price'].replaceAll(
+                                                        'Rs ',
+                                                        '',
+                                                      ),
+                                                    ),
+                                                    image: item['image'],
+                                                  );
+
+                                                  if (isFavorite) {
+                                                    favoritesProvider
+                                                        .removeFromFavorites(
+                                                          itemId,
+                                                        );
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          '${item['name']} removed from favorites',
+                                                        ),
+                                                        backgroundColor:
+                                                            Colors.red.shade600,
+                                                        duration:
+                                                            const Duration(
+                                                              seconds: 2,
+                                                            ),
+                                                        behavior:
+                                                            SnackBarBehavior
+                                                                .floating,
+                                                        shape: RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                10,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  } else {
+                                                    favoritesProvider
+                                                        .addToFavorites(
+                                                          cartItem,
+                                                        );
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          '${item['name']} added to favorites!',
+                                                        ),
+                                                        backgroundColor: Colors
+                                                            .pink
+                                                            .shade600,
+                                                        duration:
+                                                            const Duration(
+                                                              seconds: 2,
+                                                            ),
+                                                        behavior:
+                                                            SnackBarBehavior
+                                                                .floating,
+                                                        shape: RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                10,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                                icon: Icon(
+                                                  isFavorite
+                                                      ? Icons.favorite
+                                                      : Icons.favorite_border,
+                                                  color: isFavorite
+                                                      ? Colors.white
+                                                      : Colors.grey[600],
+                                                  size: 16,
                                                 ),
-                                                backgroundColor:
-                                                    Colors.green.shade600,
-                                                duration: const Duration(
-                                                  seconds: 2,
-                                                ),
-                                                behavior:
-                                                    SnackBarBehavior.floating,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                ),
+                                                padding: EdgeInsets.zero,
+                                                constraints:
+                                                    const BoxConstraints(),
+                                                tooltip: isFavorite
+                                                    ? 'Remove from favorites'
+                                                    : 'Add to favorites',
                                               ),
                                             );
                                           },
-                                          icon: Icon(
-                                            isInCart
-                                                ? Icons.add_shopping_cart
-                                                : Icons.add,
-                                            color: Colors.white,
-                                            size: 16,
-                                          ),
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(),
-                                          tooltip: 'Add to cart',
                                         ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
+                                        // Add to cart button
+                                        Consumer<CartProvider>(
+                                          builder: (context, cartProvider, child) {
+                                            final item = popularItems[index];
+                                            final itemId =
+                                                '${item['name'].toLowerCase().replaceAll(' ', '_')}_${index + 10}';
+                                            final isInCart = cartProvider
+                                                .isInCart(itemId);
 
-                            // Item details
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(
-                                  12,
-                                ), // Reduced padding
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      popularItems[index]['name'],
-                                      style: const TextStyle(
-                                        fontSize: 15, // Reduced font size
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 4,
-                                    ), // Reduced spacing
-                                    Text(
-                                      popularItems[index]['description'],
-                                      style: TextStyle(
-                                        fontSize: 12, // Reduced font size
-                                        color: Colors.grey[600],
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(
-                                      height: 8,
-                                    ), // Reduced spacing
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          popularItems[index]['price'],
-                                          style: const TextStyle(
-                                            fontSize: 15, // Reduced font size
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(
-                                              0xFF8B0000,
-                                            ), // Dark red color
-                                          ),
-                                        ),
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.star,
-                                              color: Colors.orange,
-                                              size: 14, // Reduced icon size
-                                            ),
-                                            const SizedBox(
-                                              width: 2,
-                                            ), // Reduced spacing
-                                            Text(
-                                              popularItems[index]['rating']
-                                                  .toString(),
-                                              style: const TextStyle(
-                                                fontSize:
-                                                    13, // Reduced font size
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black,
+                                            return Container(
+                                              width: 28,
+                                              height: 28,
+                                              decoration: BoxDecoration(
+                                                color: Colors.orange.shade600,
+                                                shape: BoxShape.circle,
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black
+                                                        .withOpacity(0.2),
+                                                    blurRadius: 4,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ],
                                               ),
-                                            ),
-                                          ],
+                                              child: IconButton(
+                                                onPressed: () {
+                                                  HapticFeedback.lightImpact();
+
+                                                  final cartItem = CartItem(
+                                                    id: itemId,
+                                                    name: item['name'],
+                                                    description:
+                                                        item['description'],
+                                                    price: double.parse(
+                                                      item['price'].replaceAll(
+                                                        'Rs ',
+                                                        '',
+                                                      ),
+                                                    ),
+                                                    image: item['image'],
+                                                  );
+
+                                                  cartProvider.addToCart(
+                                                    cartItem,
+                                                  );
+
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        '${item['name']} added to cart!',
+                                                      ),
+                                                      backgroundColor:
+                                                          Colors.green.shade600,
+                                                      duration: const Duration(
+                                                        seconds: 2,
+                                                      ),
+                                                      behavior: SnackBarBehavior
+                                                          .floating,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              10,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                                icon: Icon(
+                                                  isInCart
+                                                      ? Icons.add_shopping_cart
+                                                      : Icons.add,
+                                                  color: Colors.white,
+                                                  size: 16,
+                                                ),
+                                                padding: EdgeInsets.zero,
+                                                constraints:
+                                                    const BoxConstraints(),
+                                                tooltip: 'Add to cart',
+                                              ),
+                                            );
+                                          },
                                         ),
                                       ],
                                     ),
-                                  ],
+                                  ),
+                                ],
+                              ),
+
+                              // Item details
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        popularItems[index]['name'],
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        popularItems[index]['description'],
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey[600],
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            popularItems[index]['price'],
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF8B0000),
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.star,
+                                                color: Colors.orange,
+                                                size: 14,
+                                              ),
+                                              const SizedBox(width: 2),
+                                              Text(
+                                                popularItems[index]['rating']
+                                                    .toString(),
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     },
