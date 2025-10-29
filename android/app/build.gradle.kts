@@ -57,3 +57,6 @@ android {
 flutter {
     source = "../.."
 }
+
+// ✅ Enable Firebase
+apply plugin: 'com.google.gms.google-services'
