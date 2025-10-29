@@ -9,15 +9,15 @@ pipeline {
     FLUTTER_HOME = "${WORKSPACE}/.flutter"
     PATH = "${env.PATH}:${env.FLUTTER_HOME}/bin"
 
-    SONAR_TOKEN = credentials('sonarcloud-token')
-    SONAR_ORG = 'your_sonarcloud_org'
-    SONAR_PROJECT_KEY = 'your_sonarcloud_project_key'
+    SONAR_TOKEN = credentials('235372847c47ee8d087a67e69631ef896b5dfc85')
+    SONAR_ORG = 'ankurdutta21'
+    SONAR_PROJECT_KEY = 'AnkurDutta21_RoundTheClock_App'
 
-    MOBSF_API_KEY = credentials('mobsf-api-key')
-    MOBSF_URL = 'http://localhost:8000'
+    MOBSF_API_KEY = credentials('1bfaf76c9e0b6038aa5d67690146b91c7b6df9b6d8540bf9c1b292acf2a11088')
+    MOBSF_URL = 'https://mobsf.mapwala.in/'
 
-    FIREBASE_TOKEN = credentials('firebase-token')
-    FIREBASE_APP_ID = '1:1234567890:android:abcdef1234567890'
+    FIREBASE_TOKEN = credentials('1//0gy_4IsMHlCKBCgYIARAAGBASNwF-L9IrJESLoGlLNffepmLre2sH-Y1OxFEdd2cbXez1BIjgNy9BrDfD4SlWH56i6MKIBHI9uzw')
+    FIREBASE_APP_ID = '1:559369489261:android:24e5904d142c56d1cba864'
     FIREBASE_GROUPS = 'internal-testers'
   }
 
