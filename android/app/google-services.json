@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "559369489261",
+    "project_id": "rdc-app-b9168",
+    "storage_bucket": "rdc-app-b9168.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:559369489261:android:24e5904d142c56d1cba864",
+        "android_client_info": {
+          "package_name": "com.example.rtc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBegJafmjmLpOSHdS5WJC5z5OBTTwpJqJE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
